@@ -24,7 +24,6 @@ You can symlink stuff to sub directories of ~ by using the in+subdir directory n
     dotfiles/in+.ssh/config   => ~/.ssh/config
     dotfiles/in+a/in+b/c      => ~/a/b/c
 
-
 ### dotty-symlinks.yml
 
 If you want more control over the symlinking, you can create a dotty-symlink.yml in the repo root.
@@ -62,9 +61,9 @@ The class must be named "DottyRepository".
 * ruby (tested on 1.9.2) and rubygems
 * git (the git executable must be in your $PATH)
 
-Note: I had graphviz installed via brew, which has a 'dotty' executable. I fixed this by doing "mv /usr/local/bin/dotty{,.graphviz}"
+### Commands
 
-    $ dotty
+    $ dotty       (or dottie if you have graphviz installed which has a dotty executable)
 
     Tasks:
       dotty add <name> <git repo url>             # Add existing dotty git repository
@@ -110,4 +109,5 @@ Note: I had graphviz installed via brew, which has a 'dotty' executable. I fixed
 ## License
 
 Released under the LGPL License. See the LICENSE file for further details.
+
 
