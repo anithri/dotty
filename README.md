@@ -62,9 +62,7 @@ The class must be named "DottyRepository".
 * ruby (tested on 1.9.2) and rubygems
 * git (the git executable must be in your $PATH)
 
-Note: I had graphviz installed via brew, which has a 'dotty' executable. I fixed this by doing "mv /usr/local/bin/dotty{,.graphviz}"
-
-    $ dotty
+    $ dotty       (or dottie if you have graphviz installed which has a dotty executable)
 
     Tasks:
       dotty add <name> <git repo url>             # Add existing dotty git repository
