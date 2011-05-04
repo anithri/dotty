@@ -71,7 +71,7 @@ module Dotty
       end
     end
 
-    desc "execute [repo name] <command to run>", "For specified or all repositories, run given command"
+    desc "execute <command to run> [repo name]", "For specified or all repositories, run given command"
     def execute(command, repo_name=nil)
       for_specified_or_all_repos(repo_name) do |repo|
         inside repo.local_path do
