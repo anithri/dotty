@@ -148,19 +148,27 @@ describe Dotty::RepositoryActions do
     
     before do
       # TODO: Find a better way of testing thor invocations with options
-      @default_method_options = { :commit => true, :commit_message => 'Updated submodules' }
+      @default_method_options = { :commit => true, :commit_message => 'Updated submodules', :push => true }
       @actions.stub!(:options).and_return(@default_method_options)
       @actions.stub!(:run).and_return("")
     end
     
-    it "should by default update pull submodules and commit changes to the dotty repository" do
-      @actions.should_receive(:run).once.with("git submodule update --init && git submodule foreach git pull origin master && git commit -am 'Updated submodules'")
+    it "should by default update pull submodules and commit+push changes to the dotty repository" do
+      @actions.should_receive(:run).once.with("git submodule update --init && git submodule foreach git pull origin master && git commit -am 'Updated submodules' && git push")
       suppress_output do 
         @actions.update_submodules @repo
       end
     end
 
-    it "should not commit if commit option is false" do
+    it "should use the specified commit message" do
+      @actions.stub!(:options).and_return @default_method_options.merge(:push => true, :commit_message => 'My message')
+      @actions.should_receive(:run).once.with(/git commit -am 'My message'/)
+      suppress_output do 
+        @actions.update_submodules @repo
+      end
+    end
+
+    it "should not commit or push if commit option is false" do
       @actions.stub!(:options).and_return @default_method_options.merge(:commit => false)
       @actions.should_receive(:run).once.with('git submodule update --init && git submodule foreach git pull origin master')
       suppress_output do
@@ -168,9 +176,17 @@ describe Dotty::RepositoryActions do
       end
     end
 
-    it "should push if push option is true" do
-      @actions.stub!(:options).and_return @default_method_options.merge(:push => true)
+    it "should push by default" do
+      @actions.stub!(:options).and_return @default_method_options
       @actions.should_receive(:run).once.with(/git push/)
+      suppress_output do
+        @actions.update_submodules @repo
+      end
+    end
+
+    it "should not push if push option is false" do
+      @actions.stub!(:options).and_return @default_method_options.merge(:push => false)
+      @actions.should_not_receive(:run).with(/git push/)
       suppress_output do
         @actions.update_submodules @repo
       end

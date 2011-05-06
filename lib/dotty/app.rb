@@ -62,9 +62,10 @@ module Dotty
     end
 
     desc "update_submodules [name]", "For specified or all repositories,  for submodules and pull"
-    method_options :push => false
-    method_options :commit => true
     method_options :ignoredirty => false
+    method_options %w(commit_message -m) => "Updated submodules"
+    method_options :commit => true
+    method_options :push => true
     def update_submodules(repo_name=nil)
       for_specified_or_all_repos(repo_name) do |repo|
         actions.invoke :update_submodules, [repo], options

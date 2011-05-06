@@ -84,10 +84,9 @@ module Dotty
     method_options :ignoredirty => false
     method_options %w(commit_message -m) => "Updated submodules"
     method_options :commit => true
-    method_options :push => false
+    method_options :push => true
     def update_submodules(repo)
       say "update submodules", repo.name, :blue
-
       inside repo.local_path do
         cmd = []
         cmd << "git submodule update --init"
@@ -99,8 +98,8 @@ module Dotty
           else
             raise Dotty::Error, "Repository '#{repo.name}' is not in a clean state - cannot commit updated submodules"
           end
+          options[:push] && cmd << "git push"
         end
-        options[:push] && cmd << "git push"
         run cmd.join(" && ")
       end
     end
