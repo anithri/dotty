@@ -131,7 +131,7 @@ describe Dotty::App do
       end
       subject.should_receive(:run).once.with('ls')
       suppress_output do
-        subject.execute @repo1.name, 'ls'
+        subject.execute 'ls', @repo1.name
       end
     end
 
@@ -169,7 +169,7 @@ describe Dotty::App do
     it "should raise an exception when the given repository does not exist" do
       expect {
         subject.send(:find_repo!, 'nonexistant')
-      }.to raise_error Dotty::RepositoryNotFoundError, "The specified repository does not exist"
+      }.to raise_error Dotty::RepositoryNotFoundError, "Repository 'nonexistant' does not exist"
     end
   end
 

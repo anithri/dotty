@@ -130,7 +130,8 @@ module Dotty
     protected
 
     def find_repo!(name)
-      Repository.find(name.downcase) || raise(RepositoryNotFoundError, "The specified repository does not exist")  
+      name.downcase!
+      Repository.find(name) || raise(RepositoryNotFoundError, "Repository '#{name}' does not exist") 
     end
 
     def actions
