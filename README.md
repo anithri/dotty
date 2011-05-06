@@ -70,7 +70,7 @@ The class must be named "DottyRepository".
       dotty bootstrap [name]                      # Bootstrap specified or all dotty repositories. Usually involves making symlinks in your home dir.
       dotty create <name> <git repo url>          # Create a new git repository with the specified git repo url as origin
       dotty create_profile <profile name>         # Create a new profile
-      dotty execute [repo name] <command to run>  # For specified or all repositories, run given command
+      dotty execute <command to run> [repo name]  # For specified or all repositories, run given command
       dotty help [TASK]                           # Describe available tasks or one specific task
       dotty implode [name]                        # Opposite of bootstrap
       dotty import_repos <yaml_file_location>     # Imports dotty repositories from the specified yaml file location (http works)
