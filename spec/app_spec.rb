@@ -2,6 +2,12 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 
 describe Dotty::App do
+
+  before do
+    @actions = Dotty::RepositoryActions.new
+    subject.stub(:actions).and_return(@actions)
+  end
+
   describe "#add" do
     it "should invoke Dotty::Repository.add" do
       name = 'repo'
@@ -53,19 +59,19 @@ describe Dotty::App do
     include_context "two in memory repositories"
 
     before do
-      subject.send(:actions).stub!(:update)
+      @actions.stub!(:update)
     end
 
     it "should invoke update action with the specified repo" do
-      subject.send(:actions).should_receive(:update).with(@repo1).once
+      @actions.should_receive(:update).with(@repo1).once
       suppress_output do
         subject.update 'repo1name'
       end
     end
 
     it "should invoke update action for all repos if no repo is specified" do
-      subject.send(:actions).should_receive(:update).with(@repo1).once
-      subject.send(:actions).should_receive(:update).with(@repo2).once
+      @actions.should_receive(:update).with(@repo1).once
+      @actions.should_receive(:update).with(@repo2).once
       suppress_output do
         subject.update
       end
@@ -76,19 +82,19 @@ describe Dotty::App do
     include_context "two in memory repositories"
 
     before do
-      subject.send(:actions).stub!(:bootstrap)
+      @actions.stub!(:bootstrap)
     end
 
     it "should invoke bootstrap action with the specified repo" do
-      subject.send(:actions).should_receive(:bootstrap).with(@repo1).once
+      @actions.should_receive(:bootstrap).with(@repo1).once
       suppress_output do
         subject.bootstrap 'repo1name'
       end
     end
 
     it "should invoke bootstrap action for all repos if no repo is specified" do
-      subject.send(:actions).should_receive(:bootstrap).with(@repo1).once
-      subject.send(:actions).should_receive(:bootstrap).with(@repo2).once
+      @actions.should_receive(:bootstrap).with(@repo1).once
+      @actions.should_receive(:bootstrap).with(@repo2).once
       suppress_output do
         subject.bootstrap
       end
@@ -99,19 +105,19 @@ describe Dotty::App do
     include_context "two in memory repositories"
 
     before do
-      subject.send(:actions).stub!(:implode)
+      @actions.stub!(:implode)
     end
 
     it "should invoke implode action with the specified repo" do
-      subject.send(:actions).should_receive(:implode).with(@repo1).once
+      @actions.should_receive(:implode).with(@repo1).once
       suppress_output do
         subject.implode 'repo1name'
       end
     end
 
     it "should invoke implode action for all repos if no repo is specified" do
-      subject.send(:actions).should_receive(:implode).with(@repo1).once
-      subject.send(:actions).should_receive(:implode).with(@repo2).once
+      @actions.should_receive(:implode).with(@repo1).once
+      @actions.should_receive(:implode).with(@repo2).once
       suppress_output do
         subject.implode
       end
@@ -176,11 +182,6 @@ describe Dotty::App do
   describe "#actions" do
     it "should return an instance of Dotty::RepositoryActions" do
       subject.send(:actions).should be_kind_of Dotty::RepositoryActions
-    end
-
-    it "should cache it" do
-      app = subject
-      app.send(:actions).should == app.send(:actions)
     end
   end
 

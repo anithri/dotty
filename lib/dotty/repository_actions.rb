@@ -86,7 +86,7 @@ module Dotty
     method_options :commit => true
     method_options :push => true
     def update_submodules(repo)
-      say "update submodules", repo.name, :blue
+      say_status "update submodules", repo.name, :blue
       inside repo.local_path do
         cmd = []
         cmd << "git submodule update --init"

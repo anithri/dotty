@@ -136,7 +136,7 @@ module Dotty
     end
 
     def actions
-      @actions ||= RepositoryActions.new
+      RepositoryActions.new
     end
 
     def for_specified_or_all_repos(repo_name=nil)
