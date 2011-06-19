@@ -81,6 +81,7 @@ describe Dotty::Profile do
     it "should return the profile's section in profile_data" do
       Dotty::Profile.stub!(:profile_data).and_return(@profile_data)
       Dotty::Profile.current_profile_data.should == {
+        'current_target' => 'my_repo',
         'repositories' => {
           'my_repo' => {
             'url' => 'git://github.com/me/my_repo'
@@ -135,12 +136,14 @@ describe Dotty::Profile do
         "current_profile" => "my_profile", 
         "profiles" => {
           "my_profile" => {
+            "current_target" => "my_repo",
             "repositories" =>{
               "newreponame" => { "url"=>"git://github.com/me/my_repo" }, 
               "other_repo"  => { "url"=>"git://github.com/me/other_repo" }
             }
           }, 
           "other_profile" => {
+            "current_target" => "other_repo",
             "repositories" => {
               "my_repo"    => { "url"=>"git://github.com/me/my_repo" }, 
               "other_repo" => { "url"=>"git://github.com/me/other_repo"}
@@ -161,6 +164,7 @@ describe Dotty::Profile do
 
     it "should return the profile data if the profile exists" do
       Dotty::Profile.find!('other_profile').should == {
+        'current_target' => 'other_repo',
         'repositories' => {
           'my_repo'     => { 'url' => 'git://github.com/me/my_repo' },
           'other_repo'  => { 'url' => 'git://github.com/me/other_repo' }

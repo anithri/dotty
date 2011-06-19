@@ -40,6 +40,7 @@ module Dotty
       def write_yaml
         profile_data['current_profile'] = current_profile
         (profile_data['profiles'][current_profile] ||= {}).merge!(
+          'current_target' => Repository.current_target,
           'repositories' => Repository.list.inject({}) { |hsh, repo| hsh.merge(repo.name => { 'url' => repo.url }) }
         )
         FileUtils.mkdir_p App::ROOT_PATH unless File.directory?(App::ROOT_PATH)

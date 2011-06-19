@@ -112,9 +112,63 @@ describe Dotty::Repository do
       it "should have objects with the correct url" do
         Dotty::Repository.list.collect(&:url).should == %w(git://github.com/me/my_repo git://github.com/me/other_repo)
       end
+
+      it "should return a string with the currently selected target repository" do
+        Dotty::Repository.current_target.should == 'my_repo'
+      end
     end
   end
 
+  describe ".current_target=" do
+    include_context "profile data"
+
+    it "should not raise an error if set to a valid error" do
+      expect {
+        Dotty::Repository.current_target = "other_repo"
+      }.to_not raise_error Dotty::InvalidRepositoryNameError, "Not changing current target:  no repository of that name exists"
+    end
+    
+    it "should raise an error if set to an invalid value" do
+      expect {
+        Dotty::Repository.current_target = 'bad_name'
+      }.to raise_error Dotty::InvalidRepositoryNameError, "Not changing current target:  no repository of that name exists"
+    end
+  end
+
+  describe ".default_target" do
+    include_context "profile data"
+    it "should be '' if Repository.length is not 1" do
+      Dotty::Repository.stub!(:current_target).and_return([])
+      Dotty::Repository.default_target.should == ''
+      Dotty::Repository.stub!(:current_target).and_return([Dotty::Repository.new('a','urla'),Dotty::Repository.new('b','urlb')])
+      Dotty::Repository.default_target.should == ''
+    end
+
+    it "should be the name of the only entry if there is only 1 entry" do
+      Dotty::Repository.stub!(:current_target).and_return([Dotty::Repository.new('a','urla')])
+    end
+  end
+
+  describe ".reset_current_target" do
+    include_context "profile data"
+    it "should do nothing if the current .current_target is still valid" do
+      Dotty::Repository.stub(:current_target=)
+      Dotty::Repository.should_not_receive(:current_target=)
+      suppress_output do
+        Dotty::Repository.reset_current_target
+      end
+    end
+
+    it "should do call .current_default if the current .current_target is not valid" do
+      Dotty::Repository.stub(:current_target).and_return("bad_name")
+      Dotty::Repository.stub(:current_target=)
+      Dotty::Repository.should_receive(:current_target=).once
+      suppress_output do
+        Dotty::Repository.reset_current_target
+      end
+    end
+  end
+  
   describe ".find" do
     include_context "profile data"
 
@@ -160,7 +214,7 @@ describe Dotty::Repository do
         @repo.destroy
       end
     end
-    
+
     it "should invoke Dotty::RepositoryActions#destroy" do
       @actions.stub!(:destroy)
       @actions.should_receive(:destroy).with(@repo)
@@ -181,7 +235,7 @@ describe Dotty::Repository do
       @repo.git_status.should == { 'gvimrc' => ' D', 'a' => '??' }
     end
   end
-  
+
   describe "#unpushed_changes?" do
     include_context "bootstrapped repository"
 
@@ -217,7 +271,7 @@ describe Dotty::Repository do
         @repo.name.should == 'repo1'
       end
     end
-    
+
     describe "#symlinks_from_dotfiles_directories" do
       before do
         @dotfile_dirs = {
@@ -250,19 +304,19 @@ describe Dotty::Repository do
         FileUtils.mkdir_p(File.join @dotfile_dirs[:default], 'in+first/in+second/a')
         %x(touch #{@dotfile_dirs[:default]}/in+first/b)
         %x(touch #{@dotfile_dirs[:default]}/in+first/in+second/c)
-        @repo.symlinks_from_dotfiles_directories.should == { 
-          'dotfiles/in+first/in+second/a' => 'first/second/a', 
+        @repo.symlinks_from_dotfiles_directories.should == {
+          'dotfiles/in+first/in+second/a' => 'first/second/a',
           'dotfiles/in+first/b' => 'first/b',
-          'dotfiles/in+first/in+second/c' => 'first/second/c' 
+          'dotfiles/in+first/in+second/c' => 'first/second/c'
         }
       end
 
       it "should not include stuff in dirs without the in+XXX convention" do
         FileUtils.mkdir_p(File.join @dotfile_dirs[:default], 'main/sub')
-        @repo.symlinks_from_dotfiles_directories.should == { 
+        @repo.symlinks_from_dotfiles_directories.should == {
           'dotfiles/main' => 'main'
         }
-      
+
       end
     end
 

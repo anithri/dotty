@@ -194,6 +194,21 @@ describe Dotty::App do
     end
   end
 
+  describe "#current_target" do
+    it "should invoke Repository.current_target" do
+      Dotty::Repository.stub(:current_target=)
+      Dotty::Repository.should_receive(:current_target=).once.with('name')
+      suppress_output do
+        Dotty::Repository.current_target= 'name'
+      end
+    end
+
+    it "should raise an exception when the given repository does not exist" do
+      expect {
+        Dotty::Repository.current_target= 'nonexistant'
+      }.to raise_error Dotty::InvalidRepositoryNameError, "Not changing current target:  no repository of that name exists"
+    end
+  end
   describe "#create_profile" do
     it "should invoke Profile.create" do
       Dotty::Profile.stub(:create)
@@ -288,6 +303,8 @@ Installed dotty repositories for profile 'my_profile'
   my_repo               git://github.com/me/my_repo
   other_repo            git://github.com/me/other_repo
 
+  current_target = my_repo
+
 EXPECTED_OUTPUT
       end
 
@@ -303,6 +320,8 @@ Installed dotty repositories for profile 'my_profile'
 
   my_repo               git://github.com/me/my_repo [1 uncomitted changes] [unpushed commits]
   other_repo            git://github.com/me/other_repo
+
+  current_target = my_repo
 
 EXPECTED_OUTPUT
       end

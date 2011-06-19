@@ -41,12 +41,14 @@ shared_context "profile data" do
       'current_profile' => 'my_profile',
       'profiles' => {
           'my_profile' => {
+            'current_target' => 'my_repo',
             'repositories' => {
               'my_repo'     => { 'url' => 'git://github.com/me/my_repo' },
               'other_repo'  => { 'url' => 'git://github.com/me/other_repo' }
             }
           },
           'other_profile' => {
+            'current_target' => 'other_repo',
             'repositories' => {
               'my_repo'     => { 'url' => 'git://github.com/me/my_repo' },
               'other_repo'  => { 'url' => 'git://github.com/me/other_repo' }

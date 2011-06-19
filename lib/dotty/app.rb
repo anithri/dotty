@@ -19,6 +19,7 @@ module Dotty
           [repo.name, repo.url + git_changes]
         end
         print_table table, :ident => 2, :colwidth => 20
+        say("\n  current_target = #{Repository.current_target}", :blue) unless Repository.current_target == ''
       end
       say "\n"
     end
@@ -128,6 +129,19 @@ module Dotty
       Profile.remove name
     end
 
+    desc "current_target <repo_name>", "Set a repo as the target for file operations"
+    def current_target(name = '')
+      if name == ''
+        say_status "current_target", Repository.current_target
+        return
+      end
+      say_status "target", "Setting current target '#{name}'"
+      if Repository.list.empty?
+         say "No repositories here. Use 'create', 'add' or 'import_repos' to get going.", :yellow
+      else
+        Repository.current_target = name
+      end
+    end
     protected
 
     def find_repo!(name)

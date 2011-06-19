@@ -21,6 +21,7 @@ module Dotty
         repo = self.new(name, url)
         list << repo
         Profile::write_yaml
+        reset_current_target
         return repo
       end
 
@@ -40,6 +41,28 @@ module Dotty
 
       def actions
         @actions ||= Dotty::RepositoryActions.new
+      end
+
+      def current_target
+        Profile.current_profile_data['current_target'] || default_target || ''
+      end
+
+      def current_target=(val)
+        unless val.empty?  || list.detect{|repo| repo.name == val}
+          raise InvalidRepositoryNameError, "Not changing current target:  no repository of that name exists"
+        end
+        Profile.current_profile_data['current_target'] = val
+        Profile::write_yaml
+      end
+
+      def default_target
+        list.length == 1 ? list[0].name : ''
+      end
+
+      def reset_current_target
+        unless  Repository.find(Repository.current_target)
+          Repository.current_target= default_target
+        end
       end
 
       def import(location)
