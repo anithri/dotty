@@ -209,6 +209,27 @@ describe Dotty::App do
       }.to raise_error Dotty::InvalidRepositoryNameError, "Not changing current target:  no repository of that name exists"
     end
   end
+
+  describe "#track_file" do
+    include_context "bootstrapped repository"
+
+    it "should raise a DottyError if there is no current_target set" do
+      Dotty::Repository.stub(:current_target).and_return('')
+      expect {
+        subject.track_file("abc")
+      }.to raise_error Dotty::Error, "no current_target set for this profile"
+    end
+
+    it "should call Repository.current_target_repo#track__file if called with a filename" do
+      Dotty::Repository.current_target_repo.stub(:track_file)
+      Dotty::Repository.current_target_repo.should_receive(:track_file).with('filename')
+      suppress_output do
+        subject.track_file("filename")
+      end
+    end
+  end
+
+
   describe "#create_profile" do
     it "should invoke Profile.create" do
       Dotty::Profile.stub(:create)

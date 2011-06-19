@@ -15,8 +15,7 @@ Dotty::Profile.const_set :YAML_PATH, Tempfile.new('dotty-profiles-test').path
 
 Dotty::RepositoryActions.send(:remove_const, :USER_HOME)
 Dotty::RepositoryActions.const_set :USER_HOME, '/tmp/dotty-testing-user-home'
-
-RSpec.configure do |config|
+                                                                        RSpec.configure do |config|
   config.before(:each) do
   end
 

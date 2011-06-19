@@ -272,6 +272,16 @@ describe Dotty::Repository do
       end
     end
 
+    describe "#can_write_to_repo?" do
+      it "should return true is it can write" do
+        @repo.can_write_to_repo?.should be_true
+      end
+
+      it "should return true is it can't write" do
+        Dotty::Repository.new('repo_bad', '/bad/path/to/dir').can_write_to_repo?.should be_false
+      end
+    end
+
     describe "#symlinks_from_dotfiles_directories" do
       before do
         @dotfile_dirs = {
@@ -354,4 +364,76 @@ describe Dotty::Repository do
     end
   end
 
+  describe "#destination_path" do
+    include_context "bootstrapped repository"
+
+    it "should alter subdir path to be in+part" do
+      @repo.destination_path(Pathname('my_rc')).should == Pathname(@repo.local_path) + 'dotfiles' + 'my_rc'
+      @repo.destination_path(Pathname('bin/my_rc')).should == Pathname(@repo.local_path) + 'dotfiles' + 'in+bin' + 'my_rc'
+      @repo.destination_path(Pathname('tool/my_rc')).should == Pathname(@repo.local_path) + 'dotfiles' + 'in+tool' + 'my_rc'
+      @repo.destination_path(Pathname('bin/tool/my_rc')).should == Pathname(@repo.local_path) + 'dotfiles' + 'in+bin' + 'in+tool' + 'my_rc'
+    end
+  end
+
+  describe "#track_file" do
+    include_context "bootstrapped repository"
+
+    it "should raise an error if the repo dir is not writable" do
+      repo = Dotty::Repository.new('new_repo', '/some/bad/dir')
+      expect {
+        repo.track_file(".testme")
+      }.to raise_error Dotty::Error, "repo directory does not exist or is not writable: new_repo at /tmp/dotty-testing-root/default/new_repo"
+    end
+
+    context "when given an invalid filename" do
+      it "should raise an error for files outside users home dir" do
+        expect {
+          @repo.track_file("/tmp/123")
+        }.to raise_error Dotty::Error, "file must be in your home dir"
+      end
+
+      it "should raise an error for non-files" do
+        expect {
+          @repo.track_file(".")
+        }.to raise_error Dotty::Error, "file must exist and be a file: . at /tmp/dotty-testing-root/default/repo"
+      end
+
+      it "should raise an error for files don't exist" do
+        expect {
+          @repo.track_file("this/is/not/a/possible/filename/asdfasd")
+        }.to raise_error Dotty::Error, "file must exist and be a file: this/is/not/a/possible/filename/asdfasd at /tmp/dotty-testing-root/default/repo"
+      end
+    end
+
+    it "should call #copy_and_link if given valid filename" do
+      @repo.stub(:copy_and_link)
+
+      src = Pathname(Dotty::RepositoryActions::USER_HOME + '/my_rc')
+      src.open("w") do |f|
+        f.puts "stuff"
+      end
+      dest = Pathname(@repo.local_path) + 'dotfiles' + 'my_rc'
+      @repo.should_receive(:copy_and_link).once.with(src,dest)
+      @repo.track_file('my_rc')
+    end
+  end
+
+  describe "#copy_and_link" do
+    include_context "bootstrapped repository"
+
+    it "should copy files then symlink back" do
+      src = Pathname(Dotty::RepositoryActions::USER_HOME) + 'bin' + 'tools' + 'copy_and_link.test'
+      src.dirname.mkpath
+      src.open('w+') do |f|
+        f.puts "contents"
+      end
+
+      dest = @repo.destination_path(Pathname('copy_and_link_test'))
+      @repo.copy_and_link(src,dest)
+      dest.file?.should be_true
+      src.symlink?.should be_true
+      src.readlink.should == dest
+    end
+  end
+  
 end

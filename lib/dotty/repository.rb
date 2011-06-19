@@ -55,6 +55,11 @@ module Dotty
         Profile::write_yaml
       end
 
+      def current_target_repo
+        raise Dotty::Error.new("No repo selected. please set current_target") if current_target == ''
+        find(current_target)
+      end
+
       def default_target
         list.length == 1 ? list[0].name : ''
       end
@@ -149,6 +154,10 @@ module Dotty
       File.exist? File.join(local_path, 'dotty-repository.thor')
     end
 
+    def can_write_to_repo?
+      Pathname(local_path).writable?
+    end
+    
     def invoke_action(action, *args)
       self.class.actions.invoke action, args
     end
@@ -159,6 +168,36 @@ module Dotty
       Repository.actions.destroy self
       self
     end
-    
+
+    #desc "track_file <filename> <repo>", "add file to repository"
+    def track_file(filename)
+      raise Dotty::Error.new("repo directory does not exist or is not writable: #{name} at #{local_path}") unless can_write_to_repo?
+      file = Pathname(filename)
+      if file.relative?
+        relative_file = file
+        file = Pathname(RepositoryActions::USER_HOME) + file
+      else
+        raise Dotty::Error.new("file must be in your home dir") unless file.to_s.start_with?(RepositoryActions::USER_HOME)
+        relative_file = file.relative_path_from(Thor::Util.user_home)
+      end
+      raise Dotty::Error.new("file must exist and be a file: #{relative_file} at #{local_path}") unless file.file?
+
+      copy_and_link(file, destination_path(relative_file))
+    end
+
+    def destination_path(filename)
+      final = Pathname(local_path) + 'dotfiles'
+      filename.dirname.each_filename do |part|
+        next if part == "."
+        final += "in+" + part
+      end
+      final + filename.basename
+    end
+
+    def copy_and_link(src,dest)
+      dest.dirname.mkpath
+      src.rename(dest)
+      src.make_symlink(dest)
+    end
   end
 end

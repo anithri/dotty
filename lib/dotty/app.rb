@@ -6,6 +6,8 @@ module Dotty
     ROOT_PATH = File.expand_path(File.join Thor::Util.user_home, '.dotty')
     source_root File.join(File.dirname(__FILE__), '../../templates')
 
+    class_option '-v', :type => :boolean,:desc => "be verbose in output", :default => false
+
     desc "list", "List installed dotty repositories"
     def list
       say "Installed dotty repositories for profile '#{Profile::current_profile}'", :blue
@@ -142,6 +144,14 @@ module Dotty
         Repository.current_target = name
       end
     end
+
+    desc "track_file <file>", "Add file to repository named in current_target"
+    def track_file(file)
+      raise Dotty::Error.new("no current_target set for this profile") if Dotty::Repository.current_target == ''
+      say_status "track_file", "tracking #{file} to repo: #{Repository.current_target} for the profile: #{Profile.current_profile}"
+      Dotty::Repository.current_target_repo.track_file(file)
+    end
+
     protected
 
     def find_repo!(name)
